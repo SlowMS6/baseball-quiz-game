@@ -28,6 +28,11 @@ const dom = {
   questionPanel: el("question-panel"),
   questionPrompt: el("question-prompt"),
   choices: el("choices"),
+  swingPanel: el("swing-panel"),
+  swingTrack: el("swing-track"),
+  swingMarker: el("swing-marker"),
+  swingBtn: el("swing-btn"),
+  bat: el("bat"),
   gameoverTitle: el("gameover-title"),
   gameoverStats: el("gameover-stats"),
   playAgainBtn: el("play-again-btn"),
@@ -248,15 +253,6 @@ function weightedPick(options) {
   return options[options.length - 1].value;
 }
 
-function randomPlayerHitType() {
-  return weightedPick([
-    { value: "single", weight: 55 },
-    { value: "double", weight: 25 },
-    { value: "triple", weight: 10 },
-    { value: "homerun", weight: 10 },
-  ]);
-}
-
 function randomCpuOutcome() {
   return weightedPick([
     { value: "out", weight: 55 },
@@ -265,6 +261,53 @@ function randomCpuOutcome() {
     { value: "triple", weight: 5 },
     { value: "homerun", weight: 5 },
   ]);
+}
+
+// ---------- Swing meter (player timing minigame) ----------
+
+let swingAnimId = null;
+let swingPos = 50;
+
+function classifySwing(pos) {
+  const dist = Math.abs(pos - 50);
+  if (dist <= 5) {
+    return weightedPick([
+      { value: "homerun", weight: 40 },
+      { value: "triple", weight: 60 },
+    ]);
+  } else if (dist <= 15) {
+    return "double";
+  } else if (dist <= 30) {
+    return "single";
+  }
+  return "strike";
+}
+
+function startSwingMeter(onResult) {
+  const periodMs = levelConfig().swingSpeedMs || 1500;
+  const startTime = performance.now();
+  dom.bat.classList.remove("swinging");
+  dom.swingPanel.hidden = false;
+
+  function animate(now) {
+    const phase = ((now - startTime) % periodMs) / periodMs;
+    swingPos = (Math.sin(phase * Math.PI * 2 - Math.PI / 2) + 1) * 50;
+    dom.swingMarker.style.left = `${swingPos}%`;
+    swingAnimId = requestAnimationFrame(animate);
+  }
+  swingAnimId = requestAnimationFrame(animate);
+
+  function handleSwing() {
+    cancelAnimationFrame(swingAnimId);
+    dom.swingBtn.removeEventListener("click", handleSwing);
+    dom.bat.classList.add("swinging");
+    const outcome = classifySwing(swingPos);
+    setTimeout(() => {
+      dom.swingPanel.hidden = true;
+      onResult(outcome);
+    }, 250);
+  }
+  dom.swingBtn.addEventListener("click", handleSwing);
 }
 
 // ---------- CPU half-inning (auto-simulated) ----------
@@ -356,19 +399,21 @@ function onAnswer(idx, btn, question) {
 
   if (correct) {
     state.stats[subject].correct++;
-    const hitType = randomPlayerHitType();
-    const runs = applyHit(hitType, "player");
-    showMessage(`${hitType.toUpperCase()}! ${runs ? "Run(s) score!" : "Nice hit!"}`);
+    showMessage("Correct! Get ready to swing!");
+    setTimeout(() => {
+      hideQuestion();
+      startSwingMeter(resolveSwing);
+    }, 900);
+    return;
+  }
+
+  state.strikes++;
+  if (state.strikes >= 3) {
+    state.outs++;
     state.strikes = 0;
+    showMessage("Strikeout!");
   } else {
-    state.strikes++;
-    if (state.strikes >= 3) {
-      state.outs++;
-      state.strikes = 0;
-      showMessage("Strikeout!");
-    } else {
-      showMessage("Strike!");
-    }
+    showMessage("Strike!");
   }
 
   updateHUD();
@@ -376,6 +421,34 @@ function onAnswer(idx, btn, question) {
 
   setTimeout(() => {
     hideQuestion();
+    if (state.outs >= 3) {
+      endBottomHalf();
+    } else {
+      nextPitch();
+    }
+  }, 1400);
+}
+
+function resolveSwing(outcome) {
+  if (outcome === "strike") {
+    state.strikes++;
+    if (state.strikes >= 3) {
+      state.outs++;
+      state.strikes = 0;
+      showMessage("Swing and a miss — strikeout!");
+    } else {
+      showMessage("Swing and a miss!");
+    }
+  } else {
+    const runs = applyHit(outcome, "player");
+    showMessage(`${outcome.toUpperCase()}! ${runs ? "Run(s) score!" : "Nice hit!"}`);
+    state.strikes = 0;
+  }
+
+  updateHUD();
+  renderField();
+
+  setTimeout(() => {
     if (state.outs >= 3) {
       endBottomHalf();
     } else {

@@ -162,6 +162,73 @@ label, .section-label {
   padding-top: 16px;
 }
 
+#swing-panel {
+  border-top: 2px dashed #ddd;
+  padding-top: 16px;
+  text-align: center;
+}
+
+#swing-prompt {
+  font-weight: 600;
+  margin: 0 0 12px;
+}
+
+#swing-track {
+  position: relative;
+  height: 28px;
+  border-radius: 14px;
+  margin: 0 auto 16px;
+  background: linear-gradient(
+    90deg,
+    #e53935 0%, #e53935 20%,
+    #fdd835 20%, #fdd835 35%,
+    #fb8c00 35%, #fb8c00 45%,
+    #43a047 45%, #43a047 55%,
+    #fb8c00 55%, #fb8c00 65%,
+    #fdd835 65%, #fdd835 80%,
+    #e53935 80%, #e53935 100%
+  );
+  border: 2px solid #333;
+}
+
+#swing-marker {
+  position: absolute;
+  top: -4px;
+  left: 0%;
+  width: 4px;
+  height: 36px;
+  background: #1b2430;
+  border-radius: 2px;
+  transform: translateX(-50%);
+}
+
+#bat {
+  width: 10px;
+  height: 70px;
+  background: linear-gradient(#c68642, #8d5524);
+  border-radius: 6px;
+  margin: 0 auto 12px;
+  transform-origin: bottom center;
+  transform: rotate(-25deg);
+  transition: transform 0.18s ease-out;
+}
+
+#bat.swinging {
+  transform: rotate(75deg);
+}
+
+#swing-btn {
+  width: 100%;
+  padding: 14px;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #fff;
+  background: var(--field-green);
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
 #question-prompt {
   white-space: pre-line;
   font-size: 1.1rem;

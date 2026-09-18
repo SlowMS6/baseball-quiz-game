@@ -5,6 +5,7 @@
 const LEVELS = {
   1: {
     label: "Rookie League (Ages 5-7)",
+    swingSpeedMs: 1800,
     math: { min: 0, max: 10, ops: ["+", "-"] },
     spellingWords: [
       { word: "cat", sentence: "The ___ sat on the mat.", misspellings: ["cet", "kat"] },
@@ -31,6 +32,7 @@ const LEVELS = {
   },
   2: {
     label: "All-Star League (Ages 8-10)",
+    swingSpeedMs: 1300,
     math: { min: 0, max: 12, ops: ["+", "-", "*"] },
     spellingWords: [
       { word: "because", sentence: "He swung ___ the pitch looked good.", misspellings: ["becuase", "becaus"] },
