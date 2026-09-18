@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Homework Homers</title>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+<div id="app">
+
+  <section id="setup-screen" class="screen">
+    <h1>&#9918; Homework Homers</h1>
+    <p class="subtitle">Answer questions to get hits and win the game!</p>
+
+    <label for="player-name">Your name</label>
+    <input type="text" id="player-name" maxlength="20" placeholder="Enter your name" />
+
+    <p class="section-label">Choose your league</p>
+    <div id="level-select"></div>
+
+    <button id="play-ball-btn" disabled>Play Ball!</button>
+
+    <div id="lifetime-stats"></div>
+  </section>
+
+  <section id="game-screen" class="screen" hidden>
+    <div id="hud">
+      <div id="score-board">
+        <span id="cpu-score-label">CPU 0</span>
+        <span id="score-dash">&ndash;</span>
+        <span id="player-score-label">You 0</span>
+      </div>
+      <div id="inning-label">Top 1</div>
+      <div id="outs-label">Outs: <span id="outs-dots"></span></div>
+      <div id="strikes-label" hidden>Strikes: <span id="strikes-dots"></span></div>
+    </div>
+
+    <div id="field">
+      <div id="base-second" class="base"></div>
+      <div id="base-third" class="base"></div>
+      <div id="base-first" class="base"></div>
+      <div id="home-plate"></div>
+    </div>
+
+    <div id="message-banner"></div>
+
+    <div id="question-panel" hidden>
+      <p id="question-prompt"></p>
+      <div id="choices"></div>
+    </div>
+  </section>
+
+  <section id="gameover-screen" class="screen" hidden>
+    <h2 id="gameover-title"></h2>
+    <div id="gameover-stats"></div>
+    <button id="play-again-btn">Play Again</button>
+  </section>
+
+</div>
+
+<script src="questions.js"></script>
+<script src="game.js"></script>
+</body>
+</html>

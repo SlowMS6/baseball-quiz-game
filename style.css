@@ -1,0 +1,214 @@
+:root {
+  --field-green: #2e7d32;
+  --dirt: #a1665e;
+  --sky: #bfe3f7;
+  --accent: #ffb300;
+  --ink: #1b2430;
+  --card-bg: #ffffff;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: "Segoe UI", Verdana, Arial, sans-serif;
+  background: linear-gradient(180deg, var(--sky) 0%, #eaf7ff 45%, #eaf7ff 100%);
+  color: var(--ink);
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  padding: 16px;
+}
+
+#app {
+  width: 100%;
+  max-width: 520px;
+}
+
+.screen {
+  background: var(--card-bg);
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+h1 {
+  margin: 0 0 4px;
+  text-align: center;
+  font-size: 1.8rem;
+}
+
+.subtitle {
+  text-align: center;
+  margin: 0 0 20px;
+  color: #555;
+}
+
+label, .section-label {
+  display: block;
+  font-weight: 600;
+  margin: 16px 0 6px;
+}
+
+#player-name {
+  width: 100%;
+  padding: 10px 12px;
+  font-size: 1rem;
+  border: 2px solid #ccc;
+  border-radius: 8px;
+}
+
+#level-select {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.level-btn {
+  padding: 12px;
+  border: 2px solid var(--field-green);
+  background: #fff;
+  color: var(--field-green);
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: left;
+}
+
+.level-btn.selected {
+  background: var(--field-green);
+  color: #fff;
+}
+
+#play-ball-btn, #play-again-btn {
+  width: 100%;
+  margin-top: 20px;
+  padding: 14px;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #fff;
+  background: var(--accent);
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+#play-ball-btn:disabled {
+  background: #ddd;
+  cursor: not-allowed;
+}
+
+#lifetime-stats {
+  margin-top: 20px;
+  font-size: 0.85rem;
+  color: #555;
+}
+
+#hud {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+  font-weight: 700;
+}
+
+#score-board {
+  font-size: 1.2rem;
+}
+
+#field {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  max-height: 260px;
+  margin: 0 auto 16px;
+  background: var(--field-green);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.base, #home-plate {
+  position: absolute;
+  width: 34px;
+  height: 34px;
+  background: #f2f2f2;
+  border: 3px solid var(--dirt);
+  transform: translate(-50%, -50%) rotate(45deg);
+  transition: background 0.2s;
+}
+
+.base.occupied {
+  background: var(--accent);
+}
+
+#base-second { top: 18%; left: 50%; }
+#base-third  { top: 50%; left: 18%; }
+#base-first  { top: 50%; left: 82%; }
+#home-plate  { top: 82%; left: 50%; }
+
+#message-banner {
+  min-height: 24px;
+  text-align: center;
+  font-weight: 700;
+  color: var(--field-green);
+  margin-bottom: 8px;
+}
+
+#question-panel {
+  border-top: 2px dashed #ddd;
+  padding-top: 16px;
+}
+
+#question-prompt {
+  white-space: pre-line;
+  font-size: 1.1rem;
+  font-weight: 600;
+  text-align: center;
+  margin-bottom: 14px;
+}
+
+#choices {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.choice-btn {
+  padding: 12px 8px;
+  font-size: 1rem;
+  border: 2px solid var(--field-green);
+  background: #fff;
+  color: var(--ink);
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.choice-btn.correct {
+  background: #c8e6c9;
+  border-color: #2e7d32;
+}
+
+.choice-btn.incorrect {
+  background: #ffcdd2;
+  border-color: #c62828;
+}
+
+.choice-btn:disabled {
+  cursor: default;
+}
+
+#gameover-title {
+  text-align: center;
+}
+
+#gameover-stats {
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+@media (max-width: 380px) {
+  #choices { grid-template-columns: 1fr; }
+}
