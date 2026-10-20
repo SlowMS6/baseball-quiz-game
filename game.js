@@ -28,11 +28,6 @@ const dom = {
   questionPanel: el("question-panel"),
   questionPrompt: el("question-prompt"),
   choices: el("choices"),
-  swingPanel: el("swing-panel"),
-  swingTrack: el("swing-track"),
-  swingMarker: el("swing-marker"),
-  swingBtn: el("swing-btn"),
-  bat: el("bat"),
   gameoverTitle: el("gameover-title"),
   gameoverStats: el("gameover-stats"),
   playAgainBtn: el("play-again-btn"),
@@ -263,10 +258,10 @@ function randomCpuOutcome() {
   ]);
 }
 
-// ---------- Swing meter (player timing minigame) ----------
-
-let swingAnimId = null;
-let swingPos = 50;
+// ---------- Swing timing (player timing minigame) ----------
+// The 3D scene, swing input (button + spacebar), and swing-panel
+// visibility are all owned by swing3d.js, which calls classifySwing
+// below once it knows the pitch phase the player swung at.
 
 function classifySwing(pos) {
   const dist = Math.abs(pos - 50);
@@ -281,33 +276,6 @@ function classifySwing(pos) {
     return "single";
   }
   return "strike";
-}
-
-function startSwingMeter(onResult) {
-  const periodMs = levelConfig().swingSpeedMs || 1500;
-  const startTime = performance.now();
-  dom.bat.classList.remove("swinging");
-  dom.swingPanel.hidden = false;
-
-  function animate(now) {
-    const phase = ((now - startTime) % periodMs) / periodMs;
-    swingPos = (Math.sin(phase * Math.PI * 2 - Math.PI / 2) + 1) * 50;
-    dom.swingMarker.style.left = `${swingPos}%`;
-    swingAnimId = requestAnimationFrame(animate);
-  }
-  swingAnimId = requestAnimationFrame(animate);
-
-  function handleSwing() {
-    cancelAnimationFrame(swingAnimId);
-    dom.swingBtn.removeEventListener("click", handleSwing);
-    dom.bat.classList.add("swinging");
-    const outcome = classifySwing(swingPos);
-    setTimeout(() => {
-      dom.swingPanel.hidden = true;
-      onResult(outcome);
-    }, 250);
-  }
-  dom.swingBtn.addEventListener("click", handleSwing);
 }
 
 // ---------- CPU half-inning (auto-simulated) ----------
@@ -402,7 +370,7 @@ function onAnswer(idx, btn, question) {
     showMessage("Correct! Get ready to swing!");
     setTimeout(() => {
       hideQuestion();
-      startSwingMeter(resolveSwing);
+      startSwingMeter3D(resolveSwing);
     }, 900);
     return;
   }

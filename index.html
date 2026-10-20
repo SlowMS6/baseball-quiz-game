@@ -51,12 +51,10 @@
     </div>
 
     <div id="swing-panel" hidden>
-      <p id="swing-prompt">Tap SWING when the marker hits the green zone!</p>
-      <div id="swing-track">
-        <div id="swing-marker"></div>
-      </div>
-      <div id="bat"></div>
+      <p id="swing-prompt">Press SWING (or hit Space) as the pitch reaches the plate!</p>
+      <canvas id="swing3d-canvas"></canvas>
       <button id="swing-btn" type="button">SWING!</button>
+      <p class="swing3d-credit">Batter model: "Cesium Man" by Cesium, CC BY 4.0</p>
     </div>
   </section>
 
@@ -70,5 +68,13 @@
 
 <script src="questions.js"></script>
 <script src="game.js"></script>
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.min.js"
+  }
+}
+</script>
+<script type="module" src="swing3d.js"></script>
 </body>
 </html>
