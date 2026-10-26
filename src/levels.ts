@@ -2,9 +2,37 @@
 // To add a new age tier later, add a new numbered entry to LEVELS below —
 // no other file needs to change.
 
-const LEVELS = {
+export type Subject = "math" | "spelling" | "vocab";
+export type MathOp = "+" | "-" | "*";
+
+export interface SpellingWord {
+  word: string;
+  sentence: string;
+  misspellings: string[];
+}
+
+export interface VocabWord {
+  word: string;
+  sentence: string;
+  correct: string;
+  distractors: string[];
+}
+
+export interface LevelConfig {
+  label: string;
+  ages: string;
+  icon: string;
+  swingSpeedMs: number;
+  math: { min: number; max: number; ops: MathOp[] };
+  spellingWords: SpellingWord[];
+  vocabWords: VocabWord[];
+}
+
+export const LEVELS: Record<string, LevelConfig> = {
   1: {
-    label: "Rookie League (Ages 5-7)",
+    label: "Rookie League",
+    ages: "Ages 5-7",
+    icon: "\u{1F9E2}",
     swingSpeedMs: 1800,
     math: { min: 0, max: 10, ops: ["+", "-"] },
     spellingWords: [
@@ -12,7 +40,7 @@ const LEVELS = {
       { word: "dog", sentence: "My ___ likes to run.", misspellings: ["dawg", "doog"] },
       { word: "run", sentence: "I like to ___ fast.", misspellings: ["ron", "runn"] },
       { word: "big", sentence: "The elephant is very ___.", misspellings: ["bige", "beg"] },
-      { word: "red", sentence: "The apple is ___.", misspellings: ["rede", "red"] },
+      { word: "red", sentence: "The apple is ___.", misspellings: ["rede", "redd"] },
       { word: "sun", sentence: "The ___ is bright today.", misspellings: ["son", "sunn"] },
       { word: "hat", sentence: "He wore a ___ to the game.", misspellings: ["hatt", "het"] },
       { word: "fun", sentence: "Baseball is so much ___!", misspellings: ["funn", "fon"] },
@@ -31,7 +59,9 @@ const LEVELS = {
     ],
   },
   2: {
-    label: "All-Star League (Ages 8-10)",
+    label: "All-Star League",
+    ages: "Ages 8-10",
+    icon: "\u{2B50}",
     swingSpeedMs: 1300,
     math: { min: 0, max: 12, ops: ["+", "-", "*"] },
     spellingWords: [
@@ -58,84 +88,3 @@ const LEVELS = {
     ],
   },
 };
-
-function randInt(min, max) {
-  return Math.floor(Math.random() * (max - min + 1)) + min;
-}
-
-function shuffle(arr) {
-  const a = arr.slice();
-  for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [a[i], a[j]] = [a[j], a[i]];
-  }
-  return a;
-}
-
-function buildChoices(correctValue, otherValues) {
-  const choices = shuffle([correctValue, ...otherValues]);
-  return { choices, correctIndex: choices.indexOf(correctValue) };
-}
-
-function generateMathQuestion(levelConfig) {
-  const { min, max, ops } = levelConfig.math;
-  const op = ops[randInt(0, ops.length - 1)];
-  let a, b, answer, prompt;
-
-  if (op === "+") {
-    a = randInt(min, max);
-    b = randInt(min, max);
-    answer = a + b;
-    prompt = `${a} + ${b} = ?`;
-  } else if (op === "-") {
-    a = randInt(min, max);
-    b = randInt(min, a);
-    answer = a - b;
-    prompt = `${a} - ${b} = ?`;
-  } else {
-    a = randInt(1, 9);
-    b = randInt(1, 9);
-    answer = a * b;
-    prompt = `${a} × ${b} = ?`;
-  }
-
-  const distractors = new Set();
-  while (distractors.size < 3) {
-    const offset = randInt(-5, 5) || 1;
-    const candidate = answer + offset;
-    if (candidate >= 0 && candidate !== answer) distractors.add(candidate);
-  }
-
-  const { choices, correctIndex } = buildChoices(answer, [...distractors]);
-  return { prompt, choices, correctIndex };
-}
-
-function generateSpellingQuestion(levelConfig) {
-  const list = levelConfig.spellingWords;
-  const entry = list[randInt(0, list.length - 1)];
-  const prompt = `Which word correctly completes the sentence?\n"${entry.sentence}"`;
-  const { choices, correctIndex } = buildChoices(entry.word, entry.misspellings);
-  return { prompt, choices, correctIndex };
-}
-
-function generateVocabQuestion(levelConfig) {
-  const list = levelConfig.vocabWords;
-  const entry = list[randInt(0, list.length - 1)];
-  const prompt = `What does "${entry.word}" mean?\n(as in: "${entry.sentence}")`;
-  const { choices, correctIndex } = buildChoices(entry.correct, entry.distractors);
-  return { prompt, choices, correctIndex };
-}
-
-const QUESTION_GENERATORS = {
-  math: generateMathQuestion,
-  spelling: generateSpellingQuestion,
-  vocab: generateVocabQuestion,
-};
-
-function getRandomQuestion(levelConfig, subjectOverride) {
-  const subjectPool = ["math", "math", "spelling", "vocab"];
-  const subject = subjectOverride || subjectPool[randInt(0, subjectPool.length - 1)];
-  const question = QUESTION_GENERATORS[subject](levelConfig);
-  question.subject = subject;
-  return question;
-}
