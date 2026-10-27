@@ -3,78 +3,133 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="theme-color" content="#3fa9f5" />
+<meta name="description" content="Answer math, spelling, and vocabulary questions to earn your at-bats, then time your swing to smash a homer." />
 <title>Homework Homers</title>
-<link rel="stylesheet" href="style.css" />
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚾</text></svg>" />
 </head>
 <body>
-<div id="app">
-
-  <section id="setup-screen" class="screen">
-    <h1>&#9918; Homework Homers</h1>
-    <p class="subtitle">Answer questions to get hits and win the game!</p>
-
-    <label for="player-name">Your name</label>
-    <input type="text" id="player-name" maxlength="20" placeholder="Enter your name" />
-
-    <p class="section-label">Choose your league</p>
-    <div id="level-select"></div>
-
-    <button id="play-ball-btn" disabled>Play Ball!</button>
-
-    <div id="lifetime-stats"></div>
-  </section>
-
-  <section id="game-screen" class="screen" hidden>
-    <div id="hud">
-      <div id="score-board">
-        <span id="cpu-score-label">CPU 0</span>
-        <span id="score-dash">&ndash;</span>
-        <span id="player-score-label">You 0</span>
-      </div>
-      <div id="inning-label">Top 1</div>
-      <div id="outs-label">Outs: <span id="outs-dots"></span></div>
-      <div id="strikes-label" hidden>Strikes: <span id="strikes-dots"></span></div>
-    </div>
-
-    <div id="field">
-      <div id="base-second" class="base"></div>
-      <div id="base-third" class="base"></div>
-      <div id="base-first" class="base"></div>
-      <div id="home-plate"></div>
-    </div>
-
-    <div id="message-banner"></div>
-
-    <div id="question-panel" hidden>
-      <p id="question-prompt"></p>
-      <div id="choices"></div>
-    </div>
-
-    <div id="swing-panel" hidden>
-      <p id="swing-prompt">Press SWING (or hit Space) as the pitch reaches the plate!</p>
-      <canvas id="swing3d-canvas"></canvas>
-      <button id="swing-btn" type="button">SWING!</button>
-      <p class="swing3d-credit">Batter model: "Cesium Man" by Cesium, CC BY 4.0</p>
-    </div>
-  </section>
-
-  <section id="gameover-screen" class="screen" hidden>
-    <h2 id="gameover-title"></h2>
-    <div id="gameover-stats"></div>
-    <button id="play-again-btn">Play Again</button>
-  </section>
-
+<div class="backdrop" aria-hidden="true">
+  <svg class="backdrop__stadium" viewBox="0 0 1200 220" preserveAspectRatio="xMidYMax slice">
+    <rect x="70" y="20" width="10" height="200" fill="#9fb3cf" />
+    <rect x="40" y="6" width="70" height="30" rx="6" fill="#fff6d5" stroke="#9fb3cf" stroke-width="4" />
+    <rect x="1120" y="20" width="10" height="200" fill="#9fb3cf" />
+    <rect x="1090" y="6" width="70" height="30" rx="6" fill="#fff6d5" stroke="#9fb3cf" stroke-width="4" />
+    <path d="M0 120 Q600 70 1200 120 V220 H0 Z" fill="#2c3e75" />
+    <path d="M0 150 Q600 105 1200 150 V220 H0 Z" fill="#1f6f4a" />
+    <path d="M0 178 Q600 140 1200 178 V220 H0 Z" fill="#4fb548" />
+  </svg>
 </div>
 
-<script src="questions.js"></script>
-<script src="game.js"></script>
-<script type="importmap">
-{
-  "imports": {
-    "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.min.js"
-  }
-}
-</script>
-<script type="module" src="swing3d.js"></script>
+<main id="app">
+
+  <section id="setup-screen" class="screen screen--setup">
+    <header class="logo">
+      <svg class="logo__ball" viewBox="0 0 64 64" aria-hidden="true">
+        <circle cx="32" cy="32" r="29" fill="#fff" stroke="#14213d" stroke-width="4" />
+        <path d="M14 12 Q26 32 14 52 M50 12 Q38 32 50 52" fill="none" stroke="#e53935" stroke-width="3" stroke-dasharray="4 3" />
+      </svg>
+      <h1 class="logo__title"><span>Homework</span> <span>Homers</span></h1>
+      <p class="logo__tag">Answer questions. Smash homers. Win the game!</p>
+    </header>
+
+    <div class="card setup-card">
+      <label for="player-name" class="field-label">Your name</label>
+      <input type="text" id="player-name" maxlength="20" placeholder="Enter your name" autocomplete="nickname" />
+
+      <p class="field-label" id="league-label">Choose your league</p>
+      <div id="level-select" class="league-grid" role="radiogroup" aria-labelledby="league-label"></div>
+
+      <button id="play-ball-btn" class="btn btn--primary btn--big" type="button" disabled>Play Ball!</button>
+    </div>
+
+    <div id="lifetime-stats" class="card stats-card" hidden></div>
+  </section>
+
+  <section id="game-screen" class="screen screen--game" hidden>
+    <div id="hud" class="scoreboard">
+      <div class="scoreboard__teams">
+        <div class="team team--cpu" id="cpu-team">
+          <span class="team__name">CPU</span>
+          <span class="team__runs" id="cpu-score">0</span>
+        </div>
+        <div class="team team--you" id="player-team">
+          <span class="team__name" id="player-name-label">YOU</span>
+          <span class="team__runs" id="player-score">0</span>
+        </div>
+      </div>
+      <div class="inning" aria-live="off">
+        <span class="inning__arrow" id="inning-arrow">▲</span>
+        <span class="inning__num" id="inning-num">1</span>
+        <span class="inning__label">Inning</span>
+      </div>
+      <div class="diamond-box">
+        <svg class="diamond" viewBox="0 0 64 64" aria-hidden="true">
+          <path class="diamond__path" d="M32 54 L54 32 L32 10 L10 32 Z" />
+          <rect id="base-second" class="base" x="26" y="4" width="12" height="12" transform="rotate(45 32 10)" />
+          <rect id="base-third" class="base" x="4" y="26" width="12" height="12" transform="rotate(45 10 32)" />
+          <rect id="base-first" class="base" x="48" y="26" width="12" height="12" transform="rotate(45 54 32)" />
+          <path class="plate" d="M27 50 h10 v4 l-5 5 l-5 -5 Z" />
+        </svg>
+        <span id="runners-label" class="sr-only">Bases empty</span>
+      </div>
+      <div class="counts">
+        <div class="count">
+          <span class="count__label">Outs</span>
+          <span id="outs-dots" class="bulbs bulbs--outs"></span>
+        </div>
+        <div class="count" id="strikes-label">
+          <span class="count__label">Strikes</span>
+          <span id="strikes-dots" class="bulbs bulbs--strikes"></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="stage-wrap">
+      <div id="stage" class="stage">
+        <canvas id="swing3d-canvas"></canvas>
+        <div id="stage-loading" class="stage__loading">
+          <span class="spinner" aria-hidden="true"></span>
+          <span id="stage-loading-text">Warming up…</span>
+        </div>
+        <div id="message-banner" class="callout" role="status" aria-live="polite"></div>
+        <div id="hit-burst" class="hit-burst" aria-hidden="true"></div>
+      </div>
+      <p class="credit">Batter model: "Cesium Man" by Cesium, CC BY 4.0</p>
+    </div>
+
+    <div class="action">
+      <div id="question-panel" class="card question-card" hidden>
+        <span id="subject-chip" class="chip"></span>
+        <p id="question-prompt"></p>
+        <div id="choices"></div>
+      </div>
+
+      <div id="swing-panel" class="card swing-card" hidden>
+        <p id="swing-prompt">Swing when the ball reaches the <strong>glowing ring</strong>!</p>
+        <button id="swing-btn" class="btn btn--swing" type="button">SWING!</button>
+        <p class="hint">Tap the button or the field, or press <kbd>Space</kbd></p>
+      </div>
+
+      <div id="cpu-panel" class="card cpu-card" hidden>
+        <p class="cpu-card__title"><span class="cpu-card__dot"></span> CPU at bat</p>
+        <ol id="play-by-play" class="pbp"></ol>
+      </div>
+    </div>
+  </section>
+
+  <section id="gameover-screen" class="screen screen--gameover" hidden>
+    <div class="card result-card">
+      <div id="gameover-art" class="result-art" aria-hidden="true"></div>
+      <h2 id="gameover-title"></h2>
+      <div id="gameover-score" class="final-score"></div>
+      <div id="gameover-stats" class="result-stats"></div>
+      <button id="play-again-btn" class="btn btn--primary btn--big" type="button">Play Again</button>
+    </div>
+  </section>
+
+</main>
+
+<script type="module" src="/src/main.ts"></script>
 </body>
 </html>
